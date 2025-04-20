@@ -4,7 +4,7 @@ const register = async (req, res) => {
     if (!req.body || !req.body.user_name || !req.body.password) {
         return res.status(400).json({
             code: 0,
-            message: "Missing 'user_name' or 'password' in input parameters",
+            message: "missing input parameters",
         });
     }
 
@@ -37,7 +37,7 @@ const login = async (req, res) => {
     if (!req.body || !req.body.user_name || !req.body.password) {
         return res.status(400).json({
             code: 0,
-            message: "Missing 'user_name' or 'password' in input parameters",
+            message: "missing input parameters",
         });
     }
 

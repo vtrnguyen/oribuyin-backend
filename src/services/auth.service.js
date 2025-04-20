@@ -76,10 +76,10 @@ const hanldeRegister = async (newAccountInfo) => {
     }
 };
 
-const handleLogin = async ({ userName, password }) => {
+const handleLogin = async ({ user_name, password }) => {
     const account = await Account.findOne({
         where: {
-            user_name: userName,
+            user_name: user_name,
         },
         include: [{
             model: User,
@@ -111,7 +111,7 @@ const handleLogin = async ({ userName, password }) => {
             role: account.role,
         },
     }
-}
+};
 
 module.exports = {
     hanldeRegister,

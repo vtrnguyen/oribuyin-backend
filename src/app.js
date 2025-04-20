@@ -4,6 +4,8 @@ const dotenv = require("dotenv");
 const sequelize = require("./config/database");
 const authRoutes = require("./routes/auth.routes"); 
 const userRoutes = require("./routes/user.routes");
+const productRoutes = require("./routes/product.routes");
+const categoryRoutes = require("./routes/category.routes");
 
 dotenv.config();
 
@@ -17,10 +19,12 @@ sequelize.authenticate()
     .catch((err) => console.log("Connection error:", err));
 
 app.get("/", (req, res) => {
-    res.send("Welcome to OriBuyin Backend!");
+    res.send("welcome to OriBuyin server!");
 });
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/products", productRoutes);
+app.use("/api/v1/categories", categoryRoutes);
 
 module.exports = app;
