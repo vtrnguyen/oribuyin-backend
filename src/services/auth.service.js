@@ -105,6 +105,7 @@ const handleLogin = async ({ user_name, password }) => {
     return {
         message: "handleLogin successful",
         access_token: accessToken,
+        user_id: account.user_id,
         account: {
             id: account.id,
             user_name: account.user_name,

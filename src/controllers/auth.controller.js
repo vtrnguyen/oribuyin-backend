@@ -50,6 +50,7 @@ const login = async (req, res) => {
             code: 1,
             message: result.message,
             access_token: result.access_token,
+            user_id: result.user_id,
             account: result.account,
         });
     } catch (err) {
