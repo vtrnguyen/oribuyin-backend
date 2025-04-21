@@ -61,7 +61,26 @@ const login = async (req, res) => {
     }
 };
 
+const logout = async (req, res) => {
+    const accessToken = req.headers.authorization?.split(" ")[1] || req.body.access_token;
+
+    try {
+        const result = await authService.handleLogout(accessToken);
+
+        return res.status(200).json({
+            code: 1,
+            message: result.message,
+        });
+    } catch (err) {
+        return res.status(500).json({
+            code: 0,
+            message: err.message,
+        });
+    }
+};
+
 module.exports = {
     register,
     login,
+    logout,
 };

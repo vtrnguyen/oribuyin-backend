@@ -103,7 +103,7 @@ const handleLogin = async ({ user_name, password }) => {
     );
 
     return {
-        message: "handleLogin successful",
+        message: "login successful",
         access_token: accessToken,
         user_id: account.user_id,
         account: {
@@ -114,7 +114,18 @@ const handleLogin = async ({ user_name, password }) => {
     }
 };
 
+const handleLogout = async (accessToken) => {
+    if (!accessToken) throw new Error("Access token not provicded");
+
+    try {
+        return { message: "logout successful" };
+    } catch (err) {
+        throw new Error("internal server error during logout");
+    }
+}
+
 module.exports = {
     hanldeRegister,
     handleLogin,
+    handleLogout,
 };
