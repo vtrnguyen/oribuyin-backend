@@ -2,53 +2,18 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Account = require("../models/Account");
+const userService = require("./user.service");
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
-const isExistingAccount = async (userName) => {
-    const existingAccount = await Account.findOne({ 
-        where: { 
-            user_name: userName,
-        },
-    });
-
-    if (existingAccount) return true;
-
-    return false;
-};
-
-const isExistingEmail = async (email) => {
-    const existingEmail = await User.findOne({ 
-        where: { 
-            email: email,
-        },
-    });
-
-    if (existingEmail) return true;
-
-    return false;
-};
-
-const isExistingPhoneNumber = async (phoneNumber) => {
-    const existingPhoneNumber = await User.findOne({ 
-        where: { 
-            phone_number: phoneNumber,
-        },
-    });
-
-    if (existingPhoneNumber) return true;
-
-    return false;
-};
-
-const hanldeRegister = async (newAccountInfo) => {
+const handleRegister = async (newAccountInfo) => {
     const { user_name, password, first_name, last_name, email, phone_number } = newAccountInfo;
 
-    if (await isExistingAccount(user_name)) throw new Error("Username already existed!");
+    if (await userService.isExistingAccount(user_name)) throw new Error("Username already existed!");
 
-    if (await isExistingEmail(email)) throw new Error("Email already existed!");
+    if (await userService.isExistingEmail(email)) throw new Error("Email already existed!");
     
-    if (await isExistingPhoneNumber(phone_number)) throw new Error("Phonenumber already existed!");
+    if (await userService.isExistingPhoneNumber(phone_number)) throw new Error("Phonenumber already existed!");
 
     const hashedPassword = await bcrypt.hash(password, 10);
     
@@ -125,7 +90,7 @@ const handleLogout = async (accessToken) => {
 }
 
 module.exports = {
-    hanldeRegister,
+    handleRegister,
     handleLogin,
     handleLogout,
 };

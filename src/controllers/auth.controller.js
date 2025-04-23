@@ -18,7 +18,7 @@ const register = async (req, res) => {
     }
 
     try {
-        const result = await authService.hanldeRegister(req.body);
+        const result = await authService.handleRegister(req.body);
 
         res.status(201).json({
             code: 1,

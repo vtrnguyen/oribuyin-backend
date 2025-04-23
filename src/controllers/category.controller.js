@@ -18,7 +18,10 @@ const getAllCategories = async (req, res) => {
             data: categories,
         });
     } catch (err) {
-        return res.status(500).json({ err: err.message });
+        return res.status(500).json({
+            code: 0,
+            message: `error when fetching all categories: ${err.message}`,
+        });
     }
 };
 
@@ -41,7 +44,10 @@ const getCategoryByID = async (req, res) => {
             data: category,
         });
     } catch (err) {
-        return res.status(500).json({ err: err.message });
+        return res.status(500).json({
+            code: 0,
+            message: `error when fetching category: ${err.message}`,
+        });
     }
 };
 

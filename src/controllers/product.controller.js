@@ -18,7 +18,10 @@ const getAllProducts = async (req, res) => {
             data: products,
         });
     } catch (err) {
-        return res.status(500).json({ err: err.message })
+        return res.status(500).json({
+            code: 0,
+            message: `error when fetching all products: ${err.message}`,
+        })
     }
 };
 
@@ -41,7 +44,10 @@ const getProductByID = async (req, res) => {
             data: product,
         });
     } catch (err) {
-        return res.status(500).json({ err: err.message });
+        return res.status(500).json({
+            code: 0,
+            message: `error when fetching product: ${err.message}`,
+        });
     }
 }
 
