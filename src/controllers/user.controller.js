@@ -20,7 +20,7 @@ const getAllUsers = async (req, res) => {
     } catch (err) {
         res.status(500).json(
             {
-                code: 0,
+                code: -1,
                 message: `error when fetching all users: ${err.message}`,
             }
         );
@@ -48,7 +48,7 @@ const getUserByID = async (req, res) => {
     } catch (err) {
         return res.status(500).json(
             {
-                code: 0,
+                code: -1,
                 message: `error when fetching all user: ${err.message}`,
             }
         );
@@ -77,12 +77,40 @@ const createUser = async (req, res) => {
         });
     } catch (error) {
         return res.status(500).json({
-            code: 0,
+            code: -1,
             message: `error when creating new user: ${error.message}`,
             subcode: error.subcode,
         });
     }
-}
+};
+
+const updateUser = async (req, res) => {
+    const { id } = req.params;
+    const { updatingUser, updatingAccount } = req.body;
+
+    if (!updatingUser || !updatingAccount) {
+        return res.status(400).json({
+            code: 0,
+            message: "missing inputs parameters",
+        });
+    }
+
+    try {
+        const result = await userService.updateUser(id, updatingUser, updatingAccount);
+
+        return res.status(200).json({
+            code: 1,
+            message: "update user successful",
+            data: result,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when updating user infor: ${error.message}`,
+            subcode: error.subcode,
+        });
+    }
+};
 
 const deleteUser = async (req, res) => {
     const { id } = req.params;
@@ -103,15 +131,16 @@ const deleteUser = async (req, res) => {
         });
     } catch (err) {
         return res.status(500).json({
-            code: 0,
+            code: -1,
             message: `error when deleting user info: ${err.message}`,
         });
     }
-}
+};
 
 module.exports = {
     getAllUsers,
     getUserByID,
     createUser,
+    updateUser,
     deleteUser,
 }

@@ -101,6 +101,65 @@ const createUser = async (userInfo, accountInfo) => {
     };
 };
 
+const updateUser = async (userID, updatingUserInfo, updatingAccountInfo) => {
+    const updatingUser = await User.findByPk(userID);
+
+    if (!updatingUser) throw new Error("User not found");
+
+    if (updatingUserInfo.email && updatingUserInfo.email !== updatingUser.email) {
+        const existingEmail = await User.findOne({
+            where: {
+                email: updatingUserInfo.email,
+            },
+        });
+
+        if (existingEmail) {
+            const error = new Error("Email already exists");
+            error.subcode = 2;
+            throw error;
+        }
+    }
+
+    if (updatingUserInfo.phone_number && updatingUserInfo.phone_number !== updatingUser.phone_number) {
+        const existingPhoneNumber = await User.findOne({
+            where: {
+                phone_number: updatingUserInfo.phone_number,
+            },
+        });
+
+        if (existingPhoneNumber) {
+            const error = new Error("Phone number already exists");
+            error.subcode = 3;
+            throw error;
+        }
+    }
+
+    await updatingUser.update(updatingUserInfo);
+
+    const updatingAccount = await Account.findOne({
+        where: {
+            user_id: userID,
+        },
+    });
+
+    if (!updatingAccount) throw new Error("Account not found");
+
+    if (updatingAccountInfo.password) {
+        updatingAccountInfo.password = await bcrypt.hash(updatingAccountInfo.password, 10);
+    }
+
+    await updatingAccount.update(updatingAccountInfo);
+
+    return {
+        updated_user: updatingUser,
+        updated_account: {
+            id: updatingAccount.id,
+            user_name: updatingAccount.user_name,
+            role: updatingAccount.role,
+        },
+    };
+};
+
 const deleteUser = async (userID) => {
     await Account.destroy({ where: { user_id: userID } });
     return await User.destroy({ where: { id: userID } });
@@ -110,5 +169,6 @@ module.exports = {
     getAllUsers,
     getUserByID,
     createUser,
+    updateUser,
     deleteUser,
 };
