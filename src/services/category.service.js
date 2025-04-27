@@ -24,6 +24,14 @@ const getCategoryByID = async (categoryID) => {
     });
 };
 
+const getCategoryValue = async () => {
+    return await Category.findAll({
+        attributes: {
+            exclude: ["description", "image", "created_at", "updated_at"],
+        },
+    });
+};
+
 const createCategory = async (categoryInfo) => {
     if (await isExistingCategory(categoryInfo.name)) {
         const error = new Error("Category name already exists");
@@ -71,6 +79,7 @@ const deleteCategory = async (categoryID) => {
 module.exports = {
     getAllCategories,
     getCategoryByID,
+    getCategoryValue,
     createCategory,
     updateCategory,
     deleteCategory,

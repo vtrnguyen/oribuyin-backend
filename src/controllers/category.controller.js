@@ -51,6 +51,31 @@ const getCategoryByID = async (req, res) => {
     }
 };
 
+const getCategoryValue = async (req, res) => {
+    try {
+        const categoryValues = await categoryService.getCategoryValue();
+
+        if (!categoryValues || categoryValues.length === 0) {
+            return res.status(200).json({
+                code: 0,
+                message: "there are no category in the system",
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: "get all category values successful",
+            data: categoryValues,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: "error when fetching category value!",
+        });
+    }
+};
+
 const createCategory = async (req, res) => {
     const { newCategory } = req.body;
 
@@ -134,6 +159,7 @@ const deleteCategory = async (req, res) => {
 module.exports = {
     getAllCategories,
     getCategoryByID,
+    getCategoryValue,
     createCategory,
     updateCategory,
     deleteCategory,
