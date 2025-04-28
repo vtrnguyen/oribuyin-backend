@@ -18,6 +18,9 @@ const Product = sequelize.define("Product", {
 });
 
 // n - 1
-Product.belongsTo(Category, { foreignKey: "category_id" });
+Product.belongsTo(Category, { 
+    foreignKey: "category_id",
+    as: "category",
+});
 
 module.exports = Product;
