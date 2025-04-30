@@ -49,7 +49,24 @@ const getProductByID = async (req, res) => {
             message: `error when fetching product: ${err.message}`,
         });
     }
-}
+};
+
+const getNumberOfProducts = async (req, res) => {
+    try {
+        const productCounter = await productService.getNumberOfProducts();
+
+        return res.status(200).json({
+            code: 1,
+            message: "get number of products successful",
+            data: productCounter,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching number of products: ${error.message}`,
+        });
+    }
+};
 
 const createProduct = async (req, res) => {
     const { newProduct } = req.body;
@@ -138,6 +155,7 @@ const deleteProduct = async (req, res) => {
 module.exports = {
     getAllProducts,
     getProductByID,
+    getNumberOfProducts,
     createProduct,
     updateProduct,
     deleteProduct,

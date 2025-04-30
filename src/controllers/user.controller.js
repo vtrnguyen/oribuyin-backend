@@ -55,6 +55,23 @@ const getUserByID = async (req, res) => {
     }
 };
 
+const getNumberOfUsers = async (req, res) => {
+    try {
+        const userCounter = await userService.getNumberOfUsers();
+
+        return res.status(200).json({
+            code: 1,
+            message: "get number of users successful",
+            data: userCounter,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when counting number of users: ${error.message}`,
+        });
+    }
+};
+
 const createUser = async (req, res) => {
     const { newUser, newAccount } = req.body;
 
@@ -140,6 +157,7 @@ const deleteUser = async (req, res) => {
 module.exports = {
     getAllUsers,
     getUserByID,
+    getNumberOfUsers,
     createUser,
     updateUser,
     deleteUser,

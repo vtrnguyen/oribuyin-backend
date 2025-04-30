@@ -12,6 +12,15 @@ const getProductByID = async (productID) => {
     });
 };
 
+const getNumberOfProducts = async () => {
+    try {
+        const productCounter = await Product.count();
+        return productCounter;
+    } catch (error) {
+        throw new Error("Unable to fetch number of products");
+    }
+}
+
 const createProduct = async (productInfo) => {
     const newProduct = await Product.create({
         name: productInfo.name,
@@ -50,6 +59,7 @@ const deleteProduct = async (productID) => {
 module.exports = {
     getAllProducts,
     getProductByID,
+    getNumberOfProducts,
     createProduct,
     updateProduct,
     deleteProduct,

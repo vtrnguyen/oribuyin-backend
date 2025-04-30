@@ -62,6 +62,15 @@ const getUserByID = async (userID) => {
     });
 };
 
+const getNumberOfUsers = async () => {
+    try {
+        const userCounter = await User.count();
+        return userCounter;
+    } catch (error) {
+        throw new Error("Unable to count users:", error).message;
+    }
+};
+
 const createUser = async (userInfo, accountInfo) => {
     if (await isExistingAccount(accountInfo.user_name)) {
         const error = new Error("Username already exists");
@@ -168,6 +177,7 @@ const deleteUser = async (userID) => {
 module.exports = {
     getAllUsers,
     getUserByID,
+    getNumberOfUsers,
     createUser,
     updateUser,
     deleteUser,
