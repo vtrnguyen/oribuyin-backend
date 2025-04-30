@@ -38,7 +38,7 @@ const createProduct = async (productInfo) => {
 
 const updateProduct = async (productID, updatingProductInfo) => {
     const updatingProduct = await Product.findByPk(productID);
- 
+
     if (!updatingProduct) throw new Error("Product not found");
 
     await updatingProduct.update(updatingProductInfo);
@@ -46,6 +46,37 @@ const updateProduct = async (productID, updatingProductInfo) => {
     return {
         updated_product: updatingProduct,
     };
+};
+
+const updateProductStock = async (productID, stockQuantity) => {
+    const product = await Product.findByPk(productID);
+
+    if (!product) {
+        throw new Error("Product not found");
+    }
+
+    await product.update({
+        stock_quantity: stockQuantity,
+    });
+
+    return product;
+};
+
+const bulkUpdateProductStock = async (productsToUpdate) => {
+    const result = [];
+
+    for (const productInfo of productsToUpdate) {
+        const { id, stockQuantity } = productInfo;
+        const product = await Product.findByPk(id);
+        if (product) {
+            await product.update({ stock_quantity: stockQuantity });
+            result.push({ subcode: 1, id: product.id, stock_quantity: product.stockQuantity, message: "update product stock quantity successful" });
+        } else {
+            result.push({ subcode: 0, id: id, message: "no products are found" });
+        }
+    }
+
+    return result;
 };
 
 const deleteProduct = async (productID) => {
@@ -62,5 +93,7 @@ module.exports = {
     getNumberOfProducts,
     createProduct,
     updateProduct,
+    updateProductStock,
+    bulkUpdateProductStock,
     deleteProduct,
 };

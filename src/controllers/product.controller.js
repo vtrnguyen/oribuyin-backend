@@ -27,7 +27,7 @@ const getAllProducts = async (req, res) => {
 
 const getProductByID = async (req, res) => {
     const { id } = req.params;
-    
+
     try {
         const product = await productService.getProductByID(id);
 
@@ -71,7 +71,7 @@ const getNumberOfProducts = async (req, res) => {
 const createProduct = async (req, res) => {
     const { newProduct } = req.body;
 
-    if (!newProduct || !newProduct.name || newProduct.price === undefined 
+    if (!newProduct || !newProduct.name || newProduct.price === undefined
         || newProduct.stock_quantity === undefined || newProduct.discount === undefined
         || !newProduct.category_id || !newProduct.description
     ) {
@@ -101,7 +101,7 @@ const updateProduct = async (req, res) => {
     const { id } = req.params;
     const { updatingProduct } = req.body;
 
-    if (!updatingProduct || !updatingProduct.name || updatingProduct.price === undefined 
+    if (!updatingProduct || !updatingProduct.name || updatingProduct.price === undefined
         || updatingProduct.stock_quantity === undefined || updatingProduct.discount === undefined
         || !updatingProduct.category_id || !updatingProduct.description
     ) {
@@ -127,19 +127,87 @@ const updateProduct = async (req, res) => {
     }
 }
 
+const updateProductStock = async (req, res) => {
+    const { id } = req.params;
+    const { stockQuantity } = req.body;
+
+    if (stockQuantity === undefined || typeof stockQuantity !== "number") {
+        return res.status(400).json({
+            code: 0,
+            message: "invalid product stock quantity",
+        });
+    }
+
+    try {
+        const result = await productService.updateProductStock(id, stockQuantity);
+
+        if (!result) {
+            return res.status(404).json({
+                code: 0,
+                message: "product not found",
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: "update product stock quantity successul",
+            data: result,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when updating product stock: ${error.message}`,
+        });
+    }
+};
+
+const bulkUpdateProductStock = async (req, res) => {
+    const productsToUpdate = req.body;
+
+    if (!Array.isArray(productsToUpdate) || productsToUpdate.length === 0) {
+        return res.status(400).json({
+            code: 0,
+            message: "products and quantities are an array",
+        });
+    }
+
+    for (const item of productsToUpdate) {
+        if (!item.id || item.stockQuantity === undefined || typeof item.stockQuantity !== "number") {
+            return res.status(400).json({
+                code: 0,
+                message: "invalid inputs, inputs include id and stock quantity with datatypes number"
+            });
+        }
+    }
+
+    try {
+        const results = await productService.bulkUpdateProductStock(productsToUpdate);
+        return res.status(200).json({
+            code: 1,
+            message: "bulk update product stock quantities successful",
+            data: results,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: "error when bulk updating product stock quantities",
+        });
+    }
+};
+
 const deleteProduct = async (req, res) => {
     const { id } = req.params;
 
     try {
         const deletedProductCount = await productService.deleteProduct(id);
-        
+
         if (deletedProductCount === 0) {
             return res.status(404).json({
                 code: 0,
                 message: "product not found",
             });
         }
-        
+
         return res.status(200).json({
             code: 1,
             message: "delete product successful",
@@ -158,5 +226,7 @@ module.exports = {
     getNumberOfProducts,
     createProduct,
     updateProduct,
+    bulkUpdateProductStock,
+    updateProductStock,
     deleteProduct,
 }
