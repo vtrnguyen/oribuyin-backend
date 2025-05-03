@@ -1,3 +1,4 @@
+const { Sequelize } = require("sequelize");
 const Product = require("../models/Product");
 
 const getAllProducts = async () => {
@@ -19,7 +20,20 @@ const getNumberOfProducts = async () => {
     } catch (error) {
         throw new Error("Unable to fetch number of products");
     }
-}
+};
+
+const getSuggestedProducts = async () => {
+    try {
+        const suggestedProducts = await Product.findAll({
+            order: Sequelize.literal("RAND()"),
+            limit: 24,
+        });
+
+        return suggestedProducts;
+    } catch (error) {
+        throw new Error("Unable to fetch suggested products");
+    }
+};
 
 const createProduct = async (productInfo) => {
     const newProduct = await Product.create({
@@ -91,6 +105,7 @@ module.exports = {
     getAllProducts,
     getProductByID,
     getNumberOfProducts,
+    getSuggestedProducts,
     createProduct,
     updateProduct,
     updateProductStock,

@@ -68,6 +68,31 @@ const getNumberOfProducts = async (req, res) => {
     }
 };
 
+const getSuggestedProducts = async (req, res) => {
+    try {
+        const suggestedProducts = await productService.getSuggestedProducts();
+
+        if (!suggestedProducts || suggestedProducts.length === 0) {
+            return res.status(404).json({
+                code: 0,
+                message: "there are no product in the system",
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: "get suggested products successful",
+            data: suggestedProducts,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetchin suggested products: ${error.message}`,
+        });
+    }
+};
+
 const createProduct = async (req, res) => {
     const { newProduct } = req.body;
 
@@ -224,6 +249,7 @@ module.exports = {
     getAllProducts,
     getProductByID,
     getNumberOfProducts,
+    getSuggestedProducts,
     createProduct,
     updateProduct,
     bulkUpdateProductStock,
