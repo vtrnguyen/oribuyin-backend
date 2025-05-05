@@ -7,7 +7,7 @@ router.get("/", authenticate, authorize(["admin", "staff", "customer"]), product
 router.get("/count", authenticate, authorize(["admin", "staff"]), productController.getNumberOfProducts);
 router.get("/suggested", authenticate, authorize(["customer"]), productController.getSuggestedProducts);
 router.get("/categories/:categoryID", authenticate, authorize(["customer"]), productController.getProductsByCategoryID);
-router.get("/:id", authenticate, authorize(["admin", "staff", "customer"]), productController.getProductByID);
+router.get("/:id", authenticate, authorize(["customer"]), productController.getProductByID);
 router.post("/", authenticate, authorize(["admin"]), productController.createProduct);
 router.put("/:id", authenticate, authorize(["admin"]), productController.updateProduct);
 router.delete("/:id", authenticate, authorize(["admin"]), productController.deleteProduct);

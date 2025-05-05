@@ -1,16 +1,38 @@
-const { Sequelize } = require("sequelize");
+const { Sequelize, where } = require("sequelize");
 const Product = require("../models/Product");
+const Review = require("../models/Review");
+const User = require("../models/User");
 
 const getAllProducts = async () => {
     return await Product.findAll();
 };
 
 const getProductByID = async (productID) => {
-    return await Product.findOne({
-        where: {
-            id: productID,
-        },
-    });
+    try {
+        const product = await Product.findOne({
+            where: {
+                id: productID,
+            },
+        });
+
+        if (!product) throw new Error("Product not found");
+
+        const reviews = await Review.findAll({
+            where: {
+                product_id: productID,
+            },
+            include: {
+                model: User,
+                attributes: ["id", "first_name", "last_name", "avatar"],
+                as: "user",
+            },
+            order: [["created_at", "DESC"]],
+        });
+
+        return { product, reviews };
+    } catch (error) {
+        throw new Error(`error when fetching detail product: ${error.message}`);
+    }
 };
 
 const getNumberOfProducts = async () => {

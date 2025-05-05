@@ -26,27 +26,52 @@ const getAllProducts = async (req, res) => {
 };
 
 const getProductByID = async (req, res) => {
-    const { id } = req.params;
+    const productID = req.params.id;
 
     try {
-        const product = await productService.getProductByID(id);
+        const { product, reviews } = await productService.getProductByID(productID);
 
-        if (!product || product.length === 0) {
+        if (!product) {
             return res.status(404).json({
                 code: 0,
                 message: "product not found",
+                data: [],
             });
         }
 
+        const formattedReviews = reviews.map(review => ({
+            id: review.id,
+            rating: review.rating,
+            comment: review.comment,
+            timestamps: review.created_at,
+            user_avatar: review.user ? review.user.avatar : null,
+            user_full_name: review.user ? `${review.user.first_name} ${review.user.last_name}` : "OriBuyin User",
+            user_id: review.user ? review.user.id : null,
+            product_id: review.product_id,
+        }));
+
         return res.status(200).json({
             code: 1,
-            message: "get product successful",
-            data: product,
-        });
-    } catch (err) {
+            message: "fetching detail product successful",
+            data: {
+                product: {
+                    id: product.id,
+                    name: product.name,
+                    description: product.description,
+                    price: product.price,
+                    discount: product.discount,
+                    stock_quantity: product.stock_quantity,
+                    image: product.image,
+                    category_id: product.category_id,
+                    category_name: product.category_name,
+                },
+                reviews: formattedReviews,
+            },
+        })
+    } catch (error) {
         return res.status(500).json({
-            code: 0,
-            message: `error when fetching product: ${err.message}`,
+            code: -1,
+            message: `error when fetching detail product: ${error.message}`,
         });
     }
 };

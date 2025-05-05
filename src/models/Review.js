@@ -15,7 +15,10 @@ const Review = sequelize.define("Review", {
 });
 
 // n - 1
-Review.belongsTo(User, { foreignKey: "user_id" });
+Review.belongsTo(User, {
+    foreignKey: "user_id",
+    as: "user"
+});
 // n - 1
 Review.belongsTo(Product, { foreignKey: "product_id" });
 

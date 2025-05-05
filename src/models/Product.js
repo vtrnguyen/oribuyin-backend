@@ -18,7 +18,7 @@ const Product = sequelize.define("Product", {
 });
 
 // n - 1
-Product.belongsTo(Category, { 
+Product.belongsTo(Category, {
     foreignKey: "category_id",
     as: "category",
 });
