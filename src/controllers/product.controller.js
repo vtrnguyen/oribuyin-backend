@@ -93,6 +93,36 @@ const getSuggestedProducts = async (req, res) => {
     }
 };
 
+const getProductsByCategoryID = async (req, res) => {
+    const { categoryID } = req.params;
+    const { page, pageSize } = req.query;
+
+    try {
+        const result = await productService.getProductByCategoryID(categoryID, page, pageSize);
+
+        if (!result || result.products.length === 0) {
+            return res.status(200).json({
+                code: 0,
+                message: `no products found for category ID ${categoryID} on this page`,
+                data: [],
+                total_records: 0,
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: `get products by category ID ${categoryID} successful`,
+            data: result.products,
+            total_records: result.totalRecords,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching products by category ID: ${error.message}`,
+        });
+    }
+};
+
 const createProduct = async (req, res) => {
     const { newProduct } = req.body;
 
@@ -250,6 +280,7 @@ module.exports = {
     getProductByID,
     getNumberOfProducts,
     getSuggestedProducts,
+    getProductsByCategoryID,
     createProduct,
     updateProduct,
     bulkUpdateProductStock,

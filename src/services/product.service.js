@@ -35,6 +35,28 @@ const getSuggestedProducts = async () => {
     }
 };
 
+const getProductByCategoryID = async (categoryID, page, pageSize) => {
+    const limit = parseInt(pageSize, 10) || 10;
+    const offset = (parseInt(page, 10) - 1) * limit || 0; // return which item will be started
+
+    try {
+        const { count, rows } = await Product.findAndCountAll({ // count is number of products in db
+            where: {
+                category_id: categoryID,
+            },
+            limit: limit,
+            offset: offset,
+        });
+
+        return {
+            totalRecords: count,
+            products: rows,
+        };
+    } catch (error) {
+        throw new Error(`Unable to fetch products by category ID: ${error.message}`);
+    }
+};
+
 const createProduct = async (productInfo) => {
     const newProduct = await Product.create({
         name: productInfo.name,
@@ -106,6 +128,7 @@ module.exports = {
     getProductByID,
     getNumberOfProducts,
     getSuggestedProducts,
+    getProductByCategoryID,
     createProduct,
     updateProduct,
     updateProductStock,
