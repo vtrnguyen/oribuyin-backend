@@ -16,6 +16,6 @@ const CartItem = sequelize.define("CartItem", {
 // 1 - 1 
 CartItem.belongsTo(Cart, { foreignKey: "cart_id" });
 // n - 1
-CartItem.belongsTo(Product, { foreignKey: "product_id" });
+CartItem.belongsTo(Product, { foreignKey: "product_id", as: "product" });
 
 module.exports = CartItem;
