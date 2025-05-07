@@ -77,7 +77,7 @@ const getNumberOfCartProduct = async (userID) => {
     } catch (error) {
         throw new Error(`Error when fetching number of cart product: ${error.message}`);
     }
-}
+};
 
 const addToCart = async (userID, productID, quantity) => {
     try {
@@ -127,8 +127,57 @@ const addToCart = async (userID, productID, quantity) => {
     }
 };
 
+const updateCartItemQuantity = async (cartItemID, quantity) => {
+    try {
+        const cartItem = await CartItem.findByPk(cartItemID);
+
+        if (!cartItem) {
+            throw new Error(`Cart item with ID ${cartItemID} not found`);
+        }
+
+        const product = await Product.findByPk(cartItem.product_id);
+
+        if (!product) {
+            throw new Error(`Product with ID ${cartItem.product_id} not found`);
+        }
+
+        if (quantity < 1) {
+            throw new Error("Quantity must be at least 1");
+        }
+
+        if (quantity > product.stock_quantity) {
+            throw new Error(`Requested quantity (${quantity}) exceeds available stock (${product.stock_quantity})`);
+        }
+
+        cartItem.quantity = quantity;
+        await cartItem.save();
+
+        return cartItem;
+    } catch (error) {
+        throw new Error(`Error when update cart item quantity ${error.message}`);
+    }
+};
+
+const deleteCartItem = async (cartItemID) => {
+    try {
+        const cartItem = await CartItem.findByPk(cartItemID);
+
+        if (!cartItem) {
+            throw new Error(`Cart item with ID ${cartItemID} not found`);
+        }
+
+        await cartItem.destroy();
+
+        return true;
+    } catch (error) {
+        throw new Error(`Error when deleting cart item with ID ${cartItemID}`);
+    }
+};
+
 module.exports = {
     getCartByUserID,
     getNumberOfCartProduct,
     addToCart,
+    updateCartItemQuantity,
+    deleteCartItem,
 }

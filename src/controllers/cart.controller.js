@@ -69,8 +69,61 @@ const addToCart = async (req, res) => {
     }
 };
 
+const updateCartItemQuantity = async (req, res) => {
+    const { cartItemID } = req.params;
+    const { quantity } = req.body;
+
+    if (!quantity || quantity < 1) {
+        return res.status(400).json({
+            code: 0,
+            message: "invalid quantity",
+        });
+    }
+
+    try {
+        const updatedItem = await cartService.updateCartItemQuantity(cartItemID, quantity);
+        return res.status(200).json({
+            code: 1,
+            message: "update cart item quantity successful",
+            data: updatedItem,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error updating cart item quantity: ${error.message}`,
+        });
+    }
+};
+
+const deleteCartItem = async (req, res) => {
+    const cartItemID = req.params.cartItemID;
+
+    try {
+        const isDeleted = await cartService.deleteCartItem(cartItemID);
+
+        if (!isDeleted) {
+            return res.status(404).json({
+                code: 0,
+                message: `cart item with ID ${cartItemID} not found`,
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: `remove product from cart successful`,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when removing product from cart: ${error.message}`,
+        });
+    }
+};
+
 module.exports = {
     getCartByUserID,
     getNumberOfCartProduct,
     addToCart,
+    updateCartItemQuantity,
+    deleteCartItem,
 };
