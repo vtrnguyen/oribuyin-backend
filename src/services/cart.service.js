@@ -51,6 +51,34 @@ const getCartByUserID = async (userID) => {
     }
 };
 
+const getNumberOfCartProduct = async (userID) => {
+    try {
+        const existingUser = await User.findByPk(userID);
+
+        if (!existingUser) {
+            throw new Error(`User with ID ${userID} not found`);
+        }
+
+        const cart = await Cart.findOne({
+            where: {
+                user_id: userID,
+            },
+        });
+
+        if (!cart) {
+            return null;
+        }
+
+        const totalQuantity = await CartItem.count("product_id", {
+            where: { cart_id: cart.id },
+        });
+
+        return totalQuantity || 0;
+    } catch (error) {
+        throw new Error(`Error when fetching number of cart product: ${error.message}`);
+    }
+}
+
 const addToCart = async (userID, productID, quantity) => {
     try {
         const existingUser = await User.findByPk(userID);
@@ -101,5 +129,6 @@ const addToCart = async (userID, productID, quantity) => {
 
 module.exports = {
     getCartByUserID,
+    getNumberOfCartProduct,
     addToCart,
 }

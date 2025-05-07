@@ -26,6 +26,24 @@ const getCartByUserID = async (req, res) => {
     }
 };
 
+const getNumberOfCartProduct = async (req, res) => {
+    try {
+        const userID = req.params.userID;
+        const count = await cartService.getNumberOfCartProduct(userID);
+
+        return res.status(200).json({
+            code: 1,
+            message: "retrieve number cart product successful",
+            data: count,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching number of cart product: ${error.message}`,
+        });
+    }
+};
+
 const addToCart = async (req, res) => {
     const { userID, productID, quantity } = req.body;
 
@@ -53,5 +71,6 @@ const addToCart = async (req, res) => {
 
 module.exports = {
     getCartByUserID,
+    getNumberOfCartProduct,
     addToCart,
 };
