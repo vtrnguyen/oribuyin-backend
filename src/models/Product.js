@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const Category = require("./Category");
+const Review = require("./Review");
 
 const Product = sequelize.define("Product", {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -21,6 +22,11 @@ const Product = sequelize.define("Product", {
 Product.belongsTo(Category, {
     foreignKey: "category_id",
     as: "category",
+});
+// 1 - n
+Product.hasMany(Review, {
+    foreignKey: "product_id",
+    as: "review",
 });
 
 module.exports = Product;

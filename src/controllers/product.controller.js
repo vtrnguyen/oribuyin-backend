@@ -118,6 +118,71 @@ const getSuggestedProducts = async (req, res) => {
     }
 };
 
+const getPaginationProducts = async (req, res) => {
+    const { page, pageSize } = req.query;
+
+    try {
+        const result = await productService.getPaginationProducts(page, pageSize);
+
+        if (!result || result.products.length === 0) {
+            return res.status(200).json({
+                code: 0,
+                message: "no products found on this page",
+                data: [],
+                total_records: 0,
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: `get product in page ${page} successful`,
+            data: result.products,
+            total_records: result.totalRecords,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: 0,
+            message: `error when fetching pagination products: ${error.message}`,
+        });
+    }
+};
+
+const getFilteredPaginationProducts = async (req, res) => {
+    const { page, pageSize, categoryID, minPrice, maxPrice, rating } = req.query;
+
+    try {
+        const result = await productService.getFilteredPaginationProducts(
+            page,
+            pageSize,
+            categoryID,
+            minPrice,
+            maxPrice,
+            rating
+        );
+
+        if (!result || result.products.length === 0) {
+            return res.status(200).json({
+                code: 0,
+                message: "no products found matching your criteria on this page",
+                data: [],
+                total_records: 0,
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: `get filtered products in page ${page} successful`,
+            data: result.products,
+            total_records: result.total_records,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching filtered pagination products: ${error.message}`,
+        });
+    }
+};
+
 const getProductsByCategoryID = async (req, res) => {
     const { categoryID } = req.params;
     const { page, pageSize } = req.query;
@@ -305,6 +370,8 @@ module.exports = {
     getProductByID,
     getNumberOfProducts,
     getSuggestedProducts,
+    getPaginationProducts,
+    getFilteredPaginationProducts,
     getProductsByCategoryID,
     createProduct,
     updateProduct,

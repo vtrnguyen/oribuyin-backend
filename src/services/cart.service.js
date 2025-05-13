@@ -31,7 +31,8 @@ const getCartByUserID = async (userID) => {
                     as: "product",
                     attributes: ["id", "name", "price", "discount", "stock_quantity", "image"],
                 }
-            ]
+            ],
+            order: [["created_at", "DESC"]],
         });
 
         return {

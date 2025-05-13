@@ -1,7 +1,8 @@
-const { Sequelize, where } = require("sequelize");
+const { Sequelize, where, Op } = require("sequelize");
 const Product = require("../models/Product");
 const Review = require("../models/Review");
 const User = require("../models/User");
+const Category = require("../models/Category");
 
 const getAllProducts = async () => {
     return await Product.findAll();
@@ -54,6 +55,86 @@ const getSuggestedProducts = async () => {
         return suggestedProducts;
     } catch (error) {
         throw new Error("Unable to fetch suggested products");
+    }
+};
+
+const getPaginationProducts = async (page, pageSize) => {
+    const limit = parseInt(pageSize, 10) || 10;
+    const offset = (parseInt(page, 10) - 1) * limit || 0;
+
+    try {
+        const { count, rows } = await Product.findAndCountAll({
+            limit: limit,
+            offset: offset,
+        });
+
+        return {
+            totalRecords: count,
+            products: rows,
+        };
+    } catch (error) {
+        throw new Error(`Unable to fetch pagination products: ${error.message}`);
+    }
+};
+
+const getFilteredPaginationProducts = async (page, pageSize, categoryID, minPrice, maxPrice, rating) => {
+    const limit = parseInt(pageSize, 10) || 10;
+    const offset = (parseInt(page, 10) - 1) * limit || 0;
+    const whereClause = {};
+    const includeClause = [
+        {
+            model: Category,
+            as: "category",
+            where: {},
+        },
+    ];
+    const orderClause = [];
+
+    if (categoryID) {
+        includeClause[0].where.id = categoryID;
+    }
+
+    if (minPrice !== undefined && maxPrice !== undefined) {
+        whereClause.price = {
+            [Op.gte]: parseFloat(minPrice),
+            [Op.lte]: parseFloat(maxPrice),
+        };
+    } else if (minPrice !== undefined) {
+        whereClause.price = {
+            [Op.gte]: parseFloat(minPrice),
+        };
+    } else if (maxPrice !== undefined) {
+        whereClause.price = {
+            [Op.lte]: parseFloat(maxPrice),
+        };
+    }
+
+    if (rating) {
+        includeClause.push({
+            model: Review,
+            as: "review",
+            where: {
+                rating: { [Op.eq]: parseInt(rating, 10) },
+            },
+        });
+    }
+
+    try {
+        const { count, rows } = await Product.findAndCountAll({
+            where: whereClause,
+            include: includeClause,
+            limit: limit,
+            offset: offset,
+            distinct: true,
+            order: orderClause,
+        });
+
+        return {
+            total_records: count,
+            products: rows,
+        };
+    } catch (error) {
+        throw new Error(`Unable to fetch filtered pagination products: ${error.message}`);
     }
 };
 
@@ -150,6 +231,8 @@ module.exports = {
     getProductByID,
     getNumberOfProducts,
     getSuggestedProducts,
+    getPaginationProducts,
+    getFilteredPaginationProducts,
     getProductByCategoryID,
     createProduct,
     updateProduct,
