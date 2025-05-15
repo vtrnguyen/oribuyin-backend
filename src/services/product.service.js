@@ -160,6 +160,20 @@ const getProductByCategoryID = async (categoryID, page, pageSize) => {
     }
 };
 
+const getCheckoutProductDetail = async (itemIDs) => {
+    try {
+        const products = await Product.findAll({
+            where: {
+                id: itemIDs,
+            },
+        });
+
+        return products;
+    } catch (error) {
+        throw new Error(`Error when fetching checkout product detail: ${error.message}`);
+    }
+};
+
 const createProduct = async (productInfo) => {
     const newProduct = await Product.create({
         name: productInfo.name,
@@ -234,6 +248,7 @@ module.exports = {
     getPaginationProducts,
     getFilteredPaginationProducts,
     getProductByCategoryID,
+    getCheckoutProductDetail,
     createProduct,
     updateProduct,
     updateProductStock,

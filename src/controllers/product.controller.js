@@ -213,6 +213,40 @@ const getProductsByCategoryID = async (req, res) => {
     }
 };
 
+const getCheckoutProductDetail = async (req, res) => {
+    try {
+        const { itemIDs } = req.body;
+
+        if (!itemIDs || !Array.isArray(itemIDs) || itemIDs.length === 0) {
+            return res.status(400).json({
+                code: 0,
+                message: "missing input parameters",
+            });
+        }
+
+        const checkoutItems = await productService.getCheckoutProductDetail(itemIDs);
+
+        if (checkoutItems.length === 0) {
+            return res.status(200).json({
+                code: 0,
+                message: "checkout products are not found",
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: "fetch checkout products successful",
+            data: checkoutItems,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching checkout product detail: ${error.message}`,
+        });
+    }
+};
+
 const createProduct = async (req, res) => {
     const { newProduct } = req.body;
 
@@ -373,6 +407,7 @@ module.exports = {
     getPaginationProducts,
     getFilteredPaginationProducts,
     getProductsByCategoryID,
+    getCheckoutProductDetail,
     createProduct,
     updateProduct,
     bulkUpdateProductStock,
