@@ -3,6 +3,7 @@ const Product = require("../models/Product");
 const Review = require("../models/Review");
 const User = require("../models/User");
 const Category = require("../models/Category");
+const CartItem = require("../models/CartItem");
 
 const getAllProducts = async () => {
     return await Product.findAll();
@@ -168,7 +169,29 @@ const getCheckoutProductDetail = async (itemIDs) => {
             },
         });
 
-        return products;
+        const cartItems = await CartItem.findAll({
+            where: {
+                product_id: itemIDs,
+            },
+            attributes: ['product_id', 'quantity'],
+        });
+
+        const quantityMap = new Map();
+        cartItems.forEach(item => {
+            quantityMap.set(item.product_id, item.quantity);
+        });
+
+        const productsWithQuantity = products.map(product => {
+            const productData = product.get({ plain: true });
+            const quantityInCart = quantityMap.get(productData.id) || 1;
+
+            return {
+                ...productData,
+                quantity_to_buy: quantityInCart,
+            };
+        });
+
+        return productsWithQuantity;
     } catch (error) {
         throw new Error(`Error when fetching checkout product detail: ${error.message}`);
     }
