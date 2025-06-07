@@ -2,13 +2,13 @@ const orderService = require('../services/order.service');
 
 const createOrder = async (req, res) => {
     try {
-        const user_id = req.user.id;
-        const { shipping_address, payment_method, products } = req.body;
+        const user_id = req.user.user_id;
+        const { shipping_address, payment_method, products, voucher_discount = 0, shipping_fee = 30000 } = req.body;
 
-        if (!shipping_address || !payment_method || !products || !Array.isArray(products) || products.length === 0) {
+        if (!shipping_address || !payment_method || !products || !Array.isArray(products) || products.length === 0 || shipping_fee === undefined) {
             return res.status(400).json({
                 code: -1,
-                message: 'invalid order data. Please provide shipping address, payment method, and products.',
+                message: 'invalid order data. Please provide shipping address, payment method, products, and shipping fee.',
             });
         }
 
@@ -16,23 +16,25 @@ const createOrder = async (req, res) => {
             if (!product.product_id || !product.quantity || product.quantity <= 0) {
                 return res.status(400).json({
                     code: -1,
-                    message: 'invalid product data. Each product must have a valid ID and quantity greater than 0.',
+                    message: 'invalid product data. Each product must have an id and a positive quantity.',
                 });
             }
         }
 
         const orderData = {
-            user_id: user_id,
+            user_id,
             shipping_address,
             payment_method,
             products,
+            voucher_discount,
+            shipping_fee,
         };
 
         const result = await orderService.createNewOrder(orderData);
 
         res.status(201).json({
             code: 1,
-            message: 'Order created successfully',
+            message: 'order created successfully',
             data: {
                 order: result.order,
                 order_items: result.order_items,
