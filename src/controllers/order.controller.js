@@ -1,5 +1,40 @@
 const orderService = require('../services/order.service');
 
+const getAllOrdersByUserId = async (req, res) => {
+
+    const userID = req.params.userId;
+
+    if (!userID) {
+        return res.status(400).json({
+            code: 0,
+            message: "user id not be null",
+        });
+    }
+
+    try {
+        let orders = await orderService.getAllOrdersByUserId(userID);
+
+        if (orders === null || orders.length === 0) {
+            return res.status(404).json({
+                code: 0,
+                message: `no order can be found by user id: ${userID}`,
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: `get all orders by user id ${userID} sucessful`,
+            data: orders,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when get all orders by user id: ${error.message}`,
+        });
+    }
+};
+
 const createOrder = async (req, res) => {
     try {
         const user_id = req.user.user_id;
@@ -49,5 +84,6 @@ const createOrder = async (req, res) => {
 }
 
 module.exports = {
+    getAllOrdersByUserId,
     createOrder,
 };
