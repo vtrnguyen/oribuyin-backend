@@ -8,23 +8,54 @@ const CartItem = require('../models/CartItem');
 
 const getAllOrdersByUserId = async (userId) => {
     try {
+        // get all user's orders
         const orders = await Order.findAll({
             where: { user_id: userId },
-            include: [
-                {
-                    model: OrderItem,
-                    as: 'order_items',
-                    include: {
-                        model: Product,
-                        as: 'products',
-                        attributes: ['id', 'name', 'price', 'discount', 'image'],
-                    },
-                },
-            ],
             order: [['created_at', 'DESC']],
+            raw: true,
+            nest: true,
         });
 
-        return orders;
+        // from user's order, get all order id
+        const orderIds = orders.map(order => order.id);
+
+        // get all items from order's id
+        const orderItems = await OrderItem.findAll({
+            where: { order_id: { [Op.in]: orderIds } },
+            raw: true,
+            nest: true,
+        });
+
+        // get all product's id in order's items
+        const productIds = orderItems.map(item => item.product_id);
+        const products = await Product.findAll({
+            where: { id: { [Op.in]: productIds } },
+            attributes: ['id', 'name', 'price', 'discount', 'image'],
+            raw: true,
+            nest: true,
+        });
+
+        // assign products for each order item
+        const productMap = {};
+        products.forEach(p => { productMap[p.id] = p; });
+        const orderItemsWithProduct = orderItems.map(item => ({
+            ...item,
+            product: productMap[item.product_id] || null,
+        }));
+
+        // assign order items for each order
+        const orderItemsByOrderId = {};
+        orderItemsWithProduct.forEach(item => {
+            if (!orderItemsByOrderId[item.order_id]) orderItemsByOrderId[item.order_id] = [];
+            orderItemsByOrderId[item.order_id].push(item);
+        });
+
+        const ordersWithItems = orders.map(order => ({
+            ...order,
+            order_items: orderItemsByOrderId[order.id] || [],
+        }));
+
+        return ordersWithItems;
     } catch (error) {
         throw new Error(`Error fetching orders for user ID ${userId}: ${error.message}`);
     }
