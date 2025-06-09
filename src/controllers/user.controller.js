@@ -11,7 +11,7 @@ const getAllUsers = async (req, res) => {
                 data: [],
             });
         }
- 
+
         return res.status(200).json({
             code: 1,
             message: "get all users successful.",
@@ -75,7 +75,7 @@ const getNumberOfUsers = async (req, res) => {
 const createUser = async (req, res) => {
     const { newUser, newAccount } = req.body;
 
-    if (!newUser || !newUser.first_name || !newUser.last_name || !newUser.email 
+    if (!newUser || !newUser.first_name || !newUser.last_name || !newUser.email
         || !newUser.phone_number || !newUser.gender || !newUser.birth_day || !newUser.address
         || !newAccount || !newAccount.user_name || !newAccount.password || !newAccount.role) {
         return res.status(400).json({
@@ -83,7 +83,7 @@ const createUser = async (req, res) => {
             message: "missing input parameters",
         });
     }
-    
+
     try {
         const result = await userService.createUser(newUser, newAccount);
 
@@ -114,6 +114,34 @@ const updateUser = async (req, res) => {
 
     try {
         const result = await userService.updateUser(id, updatingUser, updatingAccount);
+
+        return res.status(200).json({
+            code: 1,
+            message: "update user successful",
+            data: result,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when updating user infor: ${error.message}`,
+            subcode: error.subcode,
+        });
+    }
+};
+
+const updateUserProfile = async (req, res) => {
+    const { id } = req.params;
+    const { updatingUser } = req.body;
+
+    if (!updatingUser) {
+        return res.status(400).json({
+            code: 0,
+            message: "missing inputs parameters",
+        });
+    }
+
+    try {
+        const result = await userService.updateUserProfile(id, updatingUser);
 
         return res.status(200).json({
             code: 1,
@@ -160,5 +188,6 @@ module.exports = {
     getNumberOfUsers,
     createUser,
     updateUser,
+    updateUserProfile,
     deleteUser,
 }

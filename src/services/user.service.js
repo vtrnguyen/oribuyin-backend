@@ -3,8 +3,8 @@ const Account = require("../models/Account");
 const User = require("../models/User");
 
 const isExistingAccount = async (userName) => {
-    const existingAccount = await Account.findOne({ 
-        where: { 
+    const existingAccount = await Account.findOne({
+        where: {
             user_name: userName,
         },
     });
@@ -15,8 +15,8 @@ const isExistingAccount = async (userName) => {
 };
 
 const isExistingEmail = async (email) => {
-    const existingEmail = await User.findOne({ 
-        where: { 
+    const existingEmail = await User.findOne({
+        where: {
             email: email,
         },
     });
@@ -27,8 +27,8 @@ const isExistingEmail = async (email) => {
 };
 
 const isExistingPhoneNumber = async (phoneNumber) => {
-    const existingPhoneNumber = await User.findOne({ 
-        where: { 
+    const existingPhoneNumber = await User.findOne({
+        where: {
             phone_number: phoneNumber,
         },
     });
@@ -169,6 +169,46 @@ const updateUser = async (userID, updatingUserInfo, updatingAccountInfo) => {
     };
 };
 
+const updateUserProfile = async (userID, updatingUserInfo) => {
+    const updatingUser = await User.findByPk(userID);
+
+    if (!updatingUser) throw new Error("User not found");
+
+    if (updatingUserInfo.email && updatingUserInfo.email !== updatingUser.email) {
+        const existingEmail = await User.findOne({
+            where: {
+                email: updatingUserInfo.email,
+            },
+        });
+
+        if (existingEmail) {
+            const error = new Error("Email already exists");
+            error.subcode = 2;
+            throw error;
+        }
+    }
+
+    if (updatingUserInfo.phone_number && updatingUserInfo.phone_number !== updatingUser.phone_number) {
+        const existingPhoneNumber = await User.findOne({
+            where: {
+                phone_number: updatingUserInfo.phone_number,
+            },
+        });
+
+        if (existingPhoneNumber) {
+            const error = new Error("Phone number already exists");
+            error.subcode = 3;
+            throw error;
+        }
+    }
+
+    await updatingUser.update(updatingUserInfo);
+
+    return {
+        user_info: updatingUser,
+    };
+}
+
 const deleteUser = async (userID) => {
     await Account.destroy({ where: { user_id: userID } });
     return await User.destroy({ where: { id: userID } });
@@ -180,5 +220,6 @@ module.exports = {
     getNumberOfUsers,
     createUser,
     updateUser,
+    updateUserProfile,
     deleteUser,
 };
