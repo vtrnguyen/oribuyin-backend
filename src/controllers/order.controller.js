@@ -81,9 +81,37 @@ const createOrder = async (req, res) => {
             message: `errror when creating order: ${error.message}`,
         });
     }
-}
+};
+
+const updateOrderStatus = async (req, res) => {
+    const { orderID } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+        return res.status(400).json({
+            code: 0,
+            message: "status is required",
+        });
+    }
+
+    try {
+        const result = await orderService.updateOrderStatus(orderID, status);
+
+        return res.status(200).json({
+            code: 1,
+            message: "order status updated successfully",
+            data: result,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when updating order status: ${error.message}`,
+        });
+    }
+};
 
 module.exports = {
     getAllOrdersByUserId,
     createOrder,
+    updateOrderStatus,
 };

@@ -154,7 +154,61 @@ const createNewOrder = async (orderData) => {
     }
 };
 
+const updateOrderStatus = async (orderID, status) => {
+    const transaction = await sequelize.transaction();
+
+    try {
+        const order = await Order.findByPk(orderID, { transaction: transaction });
+
+        if (!order) {
+            throw new Error("Order not found.");
+        }
+
+        // minus stock when order status is confirmed
+        if (status === "confirmed" && order.status !== "confirmed") {
+            const orderItems = await OrderItem.findAll({
+                where: {
+                    order_id: orderID,
+                },
+                transaction,
+            });
+
+            for (const item of orderItems) {
+                const product = await Product.findByPk(item.product_id, { transaction: transaction });
+
+                if (product.stock_quantity < item.quantity) {
+                    throw new Error(`Insufficient stock for prodyct ${product.name}`);
+                }
+
+                await product.update(
+                    {
+                        stock_quantity: product.stock_quantity - item.quantity,
+                    },
+                    {
+                        transaction: transaction,
+                    },
+                );
+            }
+        }
+
+        await order.update(
+            {
+                status: status,
+            },
+            {
+                transaction: transaction,
+            },
+        );
+        await transaction.commit();
+        return order;
+    } catch (error) {
+        await transaction.rollback();
+        throw new Error(`Error when updating order status: ${error.message}`);
+    }
+}
+
 module.exports = {
     getAllOrdersByUserId,
     createNewOrder,
+    updateOrderStatus,
 };
