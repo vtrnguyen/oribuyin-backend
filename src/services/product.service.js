@@ -197,6 +197,22 @@ const getCheckoutProductDetail = async (itemIDs) => {
     }
 };
 
+const searchProductsByName = async (keyword) => {
+    try {
+        const products = await Product.findAll({
+            where: {
+                name: {
+                    [Op.like]: `%${keyword}%`,
+                },
+            },
+        });
+
+        return products;
+    } catch (error) {
+        throw new Error(`Unable to search products: ${error.message}`);
+    }
+};
+
 const createProduct = async (productInfo) => {
     const newProduct = await Product.create({
         name: productInfo.name,
@@ -272,6 +288,7 @@ module.exports = {
     getFilteredPaginationProducts,
     getProductByCategoryID,
     getCheckoutProductDetail,
+    searchProductsByName,
     createProduct,
     updateProduct,
     updateProductStock,

@@ -247,6 +247,31 @@ const getCheckoutProductDetail = async (req, res) => {
     }
 };
 
+const searchProductsByName = async (req, res) => {
+    const { keyword } = req.query;
+
+    if (!keyword || keyword.trim() === "") {
+        return res.status(400).json({
+            code: 0,
+            message: "keyword is required",
+        });
+    }
+
+    try {
+        const products = await productService.searchProductsByName(keyword);
+        return res.status(200).json({
+            code: 1,
+            message: "search products successful",
+            data: products,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when searching products: ${error.message}`,
+        });
+    }
+};
+
 const createProduct = async (req, res) => {
     const { newProduct } = req.body;
 
@@ -408,6 +433,7 @@ module.exports = {
     getFilteredPaginationProducts,
     getProductsByCategoryID,
     getCheckoutProductDetail,
+    searchProductsByName,
     createProduct,
     updateProduct,
     bulkUpdateProductStock,
