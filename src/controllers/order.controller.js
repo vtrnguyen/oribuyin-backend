@@ -1,5 +1,55 @@
 const orderService = require('../services/order.service');
 
+const getAllOrders = async (req, res) => {
+    try {
+        let orders = await orderService.getAllOrders();
+
+        if (orders === null || orders.length === 0) {
+            return res.status(404).json({
+                code: 0,
+                message: "no order can be found",
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: "fetch all orders successful",
+            data: orders,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching all products: ${error.message}`,
+        });
+    }
+};
+
+const getRecentOrders = async (req, res) => {
+    try {
+        let recentOrders = await orderService.getRecentOrders();
+
+        if (recentOrders === null || recentOrders.length === 0) {
+            return res.status(404).json({
+                code: 0,
+                message: "no recent order can be found",
+                data: [],
+            });
+        }
+
+        return res.status(200).json({
+            code: 1,
+            message: "fetch all recent orders successful",
+            data: recentOrders,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching recent orders: ${error.message}`,
+        });
+    }
+};
+
 const getAllOrdersByUserId = async (req, res) => {
 
     const userID = req.params.userId;
@@ -34,6 +84,23 @@ const getAllOrdersByUserId = async (req, res) => {
         });
     }
 };
+
+const getCurrentMonthRevenue = async (req, res) => {
+    try {
+        const totalRevenue = await orderService.getCurrentMonthRevenue();
+
+        return res.status(200).json({
+            code: 1,
+            message: "get current month revenue successful",
+            data: totalRevenue,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching current month revenue`,
+        });
+    }
+}
 
 const createOrder = async (req, res) => {
     try {
@@ -111,7 +178,10 @@ const updateOrderStatus = async (req, res) => {
 };
 
 module.exports = {
+    getAllOrders,
+    getRecentOrders,
     getAllOrdersByUserId,
+    getCurrentMonthRevenue,
     createOrder,
     updateOrderStatus,
 };

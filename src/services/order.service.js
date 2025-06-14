@@ -5,6 +5,128 @@ const OrderItem = require('../models/OrderItem');
 const Product = require('../models/Product');
 const Cart = require('../models/Cart');
 const CartItem = require('../models/CartItem');
+const User = require('../models/User');
+
+const getAllOrders = async () => {
+    try {
+        const orders = await Order.findAll({
+            order: [["created_at", "DESC"]],
+            raw: true,
+            nest: true,
+            include: [{
+                model: User,
+                attributes: ["id", "first_name", "last_name", "email", "phone_number",],
+            }],
+        });
+
+        if (orders.length === 0) {
+            return [];
+        }
+
+        const orderIds = orders.map(order => order.id);
+
+        const orderItems = await OrderItem.findAll({
+            where: {
+                order_id: {
+                    [Op.in]: orderIds,
+                }
+            },
+            raw: true,
+            nest: true,
+        });
+
+        const productIds = orderItems.map(item => item.product_id);
+        const products = await Product.findAll({
+            where: {
+                id: {
+                    [Op.in]: productIds,
+                }
+            },
+            attributes: ['id', 'name', 'price', 'discount', 'image'],
+            raw: true,
+            nest: true,
+        });
+
+        const productMap = {};
+        products.forEach(p => { productMap[p.id] = p; });
+
+        const orderItemsWithProduct = orderItems.map(item => ({
+            ...item,
+            product: productMap[item.product_id] || null,
+        }));
+
+        const orderItemsByOrderId = {};
+        orderItemsWithProduct.forEach(item => {
+            if (!orderItemsByOrderId[item.order_id]) orderItemsByOrderId[item.order_id] = [];
+            orderItemsByOrderId[item.order_id].push(item);
+        });
+
+        const ordersWithDetails = orders.map(order => ({
+            id: order.id,
+            order_date: order.order_date,
+            status: order.status,
+            total_amount: order.total_amount,
+            shipping_address: order.shipping_address,
+            payment_method: order.payment_method,
+            payment_status: order.payment_status,
+            created_at: order.created_at,
+            updated_at: order.updated_at,
+            user_id: order.user_id,
+            customer: {
+                id: order.User.id,
+                first_name: order.User.first_name,
+                last_name: order.User.last_name,
+                email: order.User.email,
+                phone_number: order.User.phone_number,
+            },
+            order_items: orderItemsByOrderId[order.id] || [],
+        }));
+
+        return ordersWithDetails;
+    } catch (error) {
+        throw new Error(`Error when fetching all orders: ${error.message}`);
+    }
+};
+
+const getRecentOrders = async () => {
+    try {
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // back to 7 days
+
+        const recentOrders = await Order.findAll({
+            where: {
+                order_date: {
+                    [Op.gte]: oneWeekAgo,
+                },
+            },
+            order: [["created_at", "DESC"]],
+            raw: true,
+            nest: true,
+            include: [{
+                model: User,
+                attributes: ["first_name", "last_name"],
+            }],
+        });
+
+        const formattedRecentOrders = recentOrders.map(order => ({
+            id: order.id,
+            order_date: order.order_date,
+            status: order.status,
+            total_amount: order.total_amount,
+            shipping_address: order.shipping_address,
+            payment_method: order.payment_method,
+            payment_status: order.payment_status,
+            created_at: order.created_at,
+            updated_at: order.updated_at,
+            user_id: order.user_id,
+            customer_name: `${order.User.first_name || ''} ${order.User.last_name || ''}`.trim(),
+        }));
+
+        return formattedRecentOrders;
+    } catch (error) {
+        throw new Error(`Error when fetching recent orders: ${error.message}`);
+    }
+};
 
 const getAllOrdersByUserId = async (userId) => {
     try {
@@ -58,6 +180,31 @@ const getAllOrdersByUserId = async (userId) => {
         return ordersWithItems;
     } catch (error) {
         throw new Error(`Error fetching orders for user ID ${userId}: ${error.message}`);
+    }
+};
+
+const getCurrentMonthRevenue = async () => {
+    try {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+
+        const firstDayOfMonth = new Date(year, month, 1);
+        const lastDayOfMonth = new Date(year, month + 1, 0, 23, 59, 59, 999);
+
+        const totalRevenue = await Order.sum("total_amount", {
+            where: {
+                payment_status: "paid",
+                created_at: {
+                    [Op.gte]: firstDayOfMonth,
+                    [Op.lte]: lastDayOfMonth,
+                },
+            },
+        });
+
+        return Math.round(totalRevenue || 0);
+    } catch (error) {
+        throw new Error(`Error when fetching current month revenue: ${error.message}`);
     }
 };
 
@@ -176,6 +323,10 @@ const updateOrderStatus = async (orderID, status) => {
             for (const item of orderItems) {
                 const product = await Product.findByPk(item.product_id, { transaction: transaction });
 
+                if (!product) {
+                    throw new Error(`Product with ID ${item.product_id} not found.`);
+                }
+
                 if (product.stock_quantity < item.quantity) {
                     throw new Error(`Insufficient stock for prodyct ${product.name}`);
                 }
@@ -191,10 +342,17 @@ const updateOrderStatus = async (orderID, status) => {
             }
         }
 
+        const updateFields = {
+            status: status,
+        };
+
+        // if order is completed, update payment status tp paid 
+        if (status === "delivered") {
+            updateFields.payment_status = "paid";
+        }
+
         await order.update(
-            {
-                status: status,
-            },
+            updateFields, // Sử dụng đối tượng updateFields
             {
                 transaction: transaction,
             },
@@ -208,7 +366,10 @@ const updateOrderStatus = async (orderID, status) => {
 }
 
 module.exports = {
+    getAllOrders,
+    getRecentOrders,
     getAllOrdersByUserId,
+    getCurrentMonthRevenue,
     createNewOrder,
     updateOrderStatus,
 };
