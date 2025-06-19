@@ -8,7 +8,7 @@ router.get("/count", authenticate, authorize(["admin", "staff"]), productControl
 router.get("/suggested", authenticate, authorize(["customer"]), productController.getSuggestedProducts);
 router.get("/pagination", authenticate, authorize(["customer"]), productController.getPaginationProducts);
 router.post("/checkout", authenticate, authorize(["customer"]), productController.getCheckoutProductDetail);
-router.get("/filtered/pagination", authenticate, authorize(["customer"]), productController.getFilteredPaginationProducts);
+router.get("/filtered/pagination", authenticate, authorize(["admin", "staff", "customer"]), productController.getFilteredPaginationProducts);
 router.get("/categories/:categoryID", authenticate, authorize(["customer"]), productController.getProductsByCategoryID);
 router.get("/search", authenticate, authorize(["customer"]), productController.searchProductsByName);
 router.get("/:id", authenticate, authorize(["customer"]), productController.getProductByID);

@@ -8,7 +8,7 @@ router.get("/count", authenticate, authorize(["admin"]), userController.getNumbe
 router.get("/:id", authenticate, authorize(["admin", "customer"]), userController.getUserByID)
 router.post("/", authenticate, authorize(["admin"]), userController.createUser);
 router.put("/:id", authenticate, authorize(["admin"]), userController.updateUser);
-router.put("/update-profile/:id", authenticate, authorize(["customer"]), userController.updateUserProfile);
+router.put("/update-profile/:id", authenticate, authorize(["admin", "staff", "customer"]), userController.updateUserProfile);
 router.delete("/:id", authenticate, authorize(["admin"]), userController.deleteUser);
 
 module.exports = router;
