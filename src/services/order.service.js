@@ -195,6 +195,7 @@ const getCurrentMonthRevenue = async () => {
         const totalRevenue = await Order.sum("total_amount", {
             where: {
                 payment_status: "paid",
+                status: { [Op.ne]: "cancelled" },
                 created_at: {
                     [Op.gte]: firstDayOfMonth,
                     [Op.lte]: lastDayOfMonth,
