@@ -100,7 +100,33 @@ const getCurrentMonthRevenue = async (req, res) => {
             message: `error when fetching current month revenue`,
         });
     }
-}
+};
+
+const getOrdersByTimeRange = async (req, res) => {
+    try {
+        const { range, custom_start, custom_end } = req.query;
+
+        if (!range) {
+            return res.status(400).json({
+                code: 0,
+                message: "range is required",
+            });
+        }
+
+        const orders = await orderService.getOrdersByTimeRange(range, customStart, customEnd);
+
+        return res.status(200).json({
+            code: 1,
+            message: "get orders by time range successful",
+            data: orders,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching orders by time range: ${error.message}`,
+        });
+    }
+};
 
 const createOrder = async (req, res) => {
     try {
@@ -182,6 +208,7 @@ module.exports = {
     getRecentOrders,
     getAllOrdersByUserId,
     getCurrentMonthRevenue,
+    getOrdersByTimeRange,
     createOrder,
     updateOrderStatus,
 };

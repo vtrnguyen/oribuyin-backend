@@ -209,6 +209,88 @@ const getCurrentMonthRevenue = async () => {
     }
 };
 
+const getOrdersByTimeRange = async (range, customStart, customEnd) => {
+    try {
+        let startDate, endDate;
+        const now = new Date();
+
+        switch (range) {
+            case "today":
+                startDate = new Date(now.setHours(0, 0, 0, 0));
+                endDate = new Date(now.setHours(23, 59, 59, 999));
+                break;
+            case "yesterday":
+                startDate = new Date(now.setDate(now.getDate() - 1));
+                startDate.setHours(0, 0, 0, 0);
+                endDate = new Date(startDate);
+                endDate.setHours(23, 59, 59, 999);
+                break;
+            case "last_7_days":
+                endDate = new Date();
+                endDate.setHours(23, 59, 59, 999);
+                startDate = new Date();
+                startDate.setDate(startDate.getDate() - 6);
+                startDate.setHours(0, 0, 0, 0);
+                break;
+            case "this_month":
+                startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+                break;
+            case "last_month":
+                startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                endDate = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+                break;
+            case "this_quarter":
+                const quarter = Math.floor(now.getMonth() / 3);
+                startDate = new Date(now.getFullYear(), quarter * 3, 1);
+                endDate = new Date(now.getFullYear(), quarter * 3 + 3, 0, 23, 59, 59, 999);
+                break;
+            case "custom":
+                if (!customStart || !customEnd) throw new Error("customStart and customEnd are required for custom range");
+                startDate = new Date(customStart);
+                endDate = new Date(customEnd);
+                endDate.setHours(23, 59, 59, 999);
+                break;
+            default:
+                throw new Error("Invalid range type");
+        }
+
+        const orders = await Order.findAll({
+            where: {
+                created_at: {
+                    [Op.gte]: startDate,
+                    [Op.lte]: endDate,
+                },
+            },
+            include: [{
+                model: User,
+                attributes: ["id", "first_name", "last_name", "email", "phone_number"],
+            }],
+            order: [["created_at", "DESC"]],
+            raw: true,
+            nest: true,
+        });
+
+        const result = orders.map(order => ({
+            id: order.id,
+            order_date: order.order_date,
+            customer: {
+                id: order.User.id,
+                first_name: order.User.first_name,
+                last_name: order.User.last_name,
+                email: order.User.email,
+                phone_number: order.User.phone_number,
+            },
+            total_amount: order.total_amount,
+            status: order.status,
+        }));
+
+        return result;
+    } catch (error) {
+        throw new Error(`Error when fetching orders by time range: ${error.message}`);
+    }
+};
+
 const createNewOrder = async (orderData) => {
     const transaction = await sequelize.transaction();
 
@@ -371,6 +453,7 @@ module.exports = {
     getRecentOrders,
     getAllOrdersByUserId,
     getCurrentMonthRevenue,
+    getOrdersByTimeRange,
     createNewOrder,
     updateOrderStatus,
 };
