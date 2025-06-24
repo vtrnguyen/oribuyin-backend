@@ -113,7 +113,15 @@ const getOrdersByTimeRange = async (req, res) => {
             });
         }
 
-        const orders = await orderService.getOrdersByTimeRange(range, customStart, customEnd);
+        const orders = await orderService.getOrdersByTimeRange(range, custom_start, custom_end);
+
+        if (orders === null || orders.length === 0) {
+            return res.status(200).json({
+                code: 0,
+                message: `no orders found for the specified time range: ${range}`,
+                data: [],
+            });
+        }
 
         return res.status(200).json({
             code: 1,
