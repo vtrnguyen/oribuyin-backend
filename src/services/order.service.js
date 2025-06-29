@@ -255,6 +255,7 @@ const getOrdersByTimeRange = async (range, customStart, customEnd) => {
                 throw new Error("Invalid range type");
         }
 
+        // get all orders within the specified time range
         const orders = await Order.findAll({
             where: {
                 created_at: {
@@ -271,6 +272,27 @@ const getOrdersByTimeRange = async (range, customStart, customEnd) => {
             nest: true,
         });
 
+        // get all order ids
+        const orderIds = orders.map(order => order.id);
+
+        // get all order items for those orders
+        const orderItems = await OrderItem.findAll({
+            where: { order_id: { [Op.in]: orderIds } },
+            attributes: ["order_id", "quantity"],
+            raw: true,
+        });
+
+        // get number of items in each order
+        const quantityByOrderId = {};
+        orderItems.forEach(item => {
+            // initialize the quantity for the order if it doesn't exist
+            if (!quantityByOrderId[item.order_id]) {
+                quantityByOrderId[item.order_id] = 0;
+            }
+            // accumulate the quantity for the order
+            quantityByOrderId[item.order_id] += item.quantity;
+        });
+
         const result = orders.map(order => ({
             id: order.id,
             order_date: order.order_date,
@@ -283,6 +305,8 @@ const getOrdersByTimeRange = async (range, customStart, customEnd) => {
             },
             total_amount: order.total_amount,
             status: order.status,
+            payment_status: order.payment_status,
+            product_item_quantity: quantityByOrderId[order.id] || 0,
         }));
 
         return result;
