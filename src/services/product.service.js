@@ -197,6 +197,32 @@ const getCheckoutProductDetail = async (itemIDs) => {
     }
 };
 
+const getTotalStockQuantity = async () => {
+    try {
+        const totalStock = await Product.sum('stock_quantity');
+        return totalStock || 0;
+    } catch (error) {
+        throw new Error(`Unable to fetch total stock quantity: ${error.message}`);
+    }
+};
+
+const getTotalAlmostOutOfStockQuantity = async () => {
+    try {
+        const products = await Product.findAll({
+            where: {
+                // stock_quantity is between 1 and 5 is considered as almost out of stock
+                stock_quantity: {
+                    [Op.lte]: 5,
+                    [Op.gte]: 1,
+                },
+            },
+        });
+        return products.length;
+    } catch (error) {
+        throw new Error(`Unable to fetch number of almost out of stock products: ${error.message}`);
+    }
+}
+
 const searchProductsByName = async (keyword) => {
     try {
         const products = await Product.findAll({
@@ -288,6 +314,8 @@ module.exports = {
     getFilteredPaginationProducts,
     getProductByCategoryID,
     getCheckoutProductDetail,
+    getTotalStockQuantity,
+    getTotalAlmostOutOfStockQuantity,
     searchProductsByName,
     createProduct,
     updateProduct,

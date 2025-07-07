@@ -7,6 +7,7 @@ router.get("/", authenticate, authorize(["admin", "staff"]), orderController.get
 router.get("/recent", authenticate, authorize(["admin", "staff"]), orderController.getRecentOrders);
 router.get("/current-month-revenue", authenticate, authorize(["admin"]), orderController.getCurrentMonthRevenue);
 router.get("/by-time-range", authenticate, authorize(["admin", "staff"]), orderController.getOrdersByTimeRange);
+router.get("/count-pending", authenticate, authorize(["admin", "staff"]), orderController.getNumberOfPendingOrders);
 router.get("/:userId", authenticate, authorize(["admin", "staff", "customer"]), orderController.getAllOrdersByUserId);
 router.post("/", authenticate, authorize(["customer"]), orderController.createOrder);
 router.put("/:orderID/status", authenticate, authorize(["admin", "staff", "customer"]), orderController.updateOrderStatus);

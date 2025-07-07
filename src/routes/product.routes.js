@@ -11,6 +11,8 @@ router.post("/checkout", authenticate, authorize(["customer"]), productControlle
 router.get("/filtered/pagination", authenticate, authorize(["admin", "staff", "customer"]), productController.getFilteredPaginationProducts);
 router.get("/categories/:categoryID", authenticate, authorize(["customer"]), productController.getProductsByCategoryID);
 router.get("/search", authenticate, authorize(["customer"]), productController.searchProductsByName);
+router.get("/total-stock", authenticate, authorize(["admin", "staff"]), productController.getTotalStockQuantity);
+router.get("/almost-out-of-stock", authenticate, authorize(["admin", "staff"]), productController.getTotalAlmostOutOfStockQuantity);
 router.get("/:id", authenticate, authorize(["customer"]), productController.getProductByID);
 router.post("/", authenticate, authorize(["admin"]), productController.createProduct);
 router.put("/:id", authenticate, authorize(["admin"]), productController.updateProduct);

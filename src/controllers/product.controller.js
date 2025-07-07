@@ -247,6 +247,39 @@ const getCheckoutProductDetail = async (req, res) => {
     }
 };
 
+const getTotalStockQuantity = async (req, res) => {
+    try {
+        const totalStock = await productService.getTotalStockQuantity();
+        return res.status(200).json({
+            code: 1,
+            message: "fetch total stock quantity successful",
+            data: totalStock,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching total stock quantity: ${error.message}`,
+        });
+    }
+}
+
+const getTotalAlmostOutOfStockQuantity = async (req, res) => {
+    try {
+        const numberOfAlmostOutOfStock = await productService.getTotalAlmostOutOfStockQuantity();
+
+        return res.status(200).json({
+            code: 1,
+            message: "fetch number of almost out of stock products successful",
+            data: numberOfAlmostOutOfStock,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching number of almost out of stock products: ${error.message}`,
+        });
+    }
+}
+
 const searchProductsByName = async (req, res) => {
     const { keyword } = req.query;
 
@@ -433,6 +466,8 @@ module.exports = {
     getFilteredPaginationProducts,
     getProductsByCategoryID,
     getCheckoutProductDetail,
+    getTotalStockQuantity,
+    getTotalAlmostOutOfStockQuantity,
     searchProductsByName,
     createProduct,
     updateProduct,

@@ -136,6 +136,22 @@ const getOrdersByTimeRange = async (req, res) => {
     }
 };
 
+const getNumberOfPendingOrders = async (req, res) => {
+    try {
+        const pendingOrdersCount = await orderService.getNumberOfPendingOrders();
+        return res.status(200).json({
+            code: 1,
+            message: "get number of pending orders successful",
+            data: pendingOrdersCount,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching number of pending orders: ${error.message}`,
+        });
+    }
+}
+
 const createOrder = async (req, res) => {
     try {
         const user_id = req.user.user_id;
@@ -217,6 +233,7 @@ module.exports = {
     getAllOrdersByUserId,
     getCurrentMonthRevenue,
     getOrdersByTimeRange,
+    getNumberOfPendingOrders,
     createOrder,
     updateOrderStatus,
 };

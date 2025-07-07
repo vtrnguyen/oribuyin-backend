@@ -315,6 +315,20 @@ const getOrdersByTimeRange = async (range, customStart, customEnd) => {
     }
 };
 
+const getNumberOfPendingOrders = async () => {
+    try {
+        const pendingOrdersCount = await Order.count({
+            where: {
+                status: "pending",
+            },
+        });
+
+        return pendingOrdersCount;
+    } catch (error) {
+        throw new Error(`Error when fetching number of pending orders: ${error.message}`);
+    }
+}
+
 const createNewOrder = async (orderData) => {
     const transaction = await sequelize.transaction();
 
@@ -478,6 +492,7 @@ module.exports = {
     getAllOrdersByUserId,
     getCurrentMonthRevenue,
     getOrdersByTimeRange,
+    getNumberOfPendingOrders,
     createNewOrder,
     updateOrderStatus,
 };
