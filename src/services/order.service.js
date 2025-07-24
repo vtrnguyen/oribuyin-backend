@@ -473,7 +473,7 @@ const updateOrderStatus = async (orderID, status) => {
         }
 
         await order.update(
-            updateFields, // Sử dụng đối tượng updateFields
+            updateFields,
             {
                 transaction: transaction,
             },
