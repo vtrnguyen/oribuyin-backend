@@ -12,11 +12,11 @@ const handleRegister = async (newAccountInfo) => {
     if (await userService.isExistingAccount(user_name)) throw new Error("Username already existed!");
 
     if (await userService.isExistingEmail(email)) throw new Error("Email already existed!");
-    
+
     if (await userService.isExistingPhoneNumber(phone_number)) throw new Error("Phonenumber already existed!");
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     const newUser = await User.create({
         first_name: first_name,
         last_name: last_name,
@@ -64,7 +64,7 @@ const handleLogin = async ({ user_name, password }) => {
             role: account.role,
         },
         JWT_SECRET_KEY,
-        { expiresIn: "1h" },
+        { expiresIn: "14d" },
     );
 
     return {
