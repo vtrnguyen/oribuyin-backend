@@ -31,8 +31,19 @@ const handleRegister = async (newAccountInfo) => {
         user_id: newUser.id,
     });
 
+    const accessToken = jwt.sign(
+        {
+            user_id: newAccount.user_id,
+            role: newAccount.role,
+        },
+        JWT_SECRET_KEY,
+        { expiresIn: "14d" }
+    );
+
     return {
         message: "register new account successful",
+        access_token: accessToken,
+        user_id: newAccount.id,
         account: {
             id: newAccount.id,
             user_name: newAccount.user_name,
