@@ -222,4 +222,7 @@ module.exports = {
     updateUser,
     updateUserProfile,
     deleteUser,
+    isExistingAccount,
+    isExistingEmail,
+    isExistingPhoneNumber,
 };
