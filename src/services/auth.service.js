@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Account = require("../models/Account");
 const userService = require("./user.service");
+const mailer = require("../services/mailer.service");
+const { EmailTemplateType } = require("../utils/constants.util");
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
@@ -39,6 +41,16 @@ const handleRegister = async (newAccountInfo) => {
         JWT_SECRET_KEY,
         { expiresIn: "14d" }
     );
+
+    try {
+        await mailer.sendMail(EmailTemplateType.WELCOME, newUser.email, {
+            first_name: newUser.first_name,
+            last_name: newUser.last_name,
+            user_name: newAccount.user_name,
+        });
+    } catch (error) {
+        console.error("Failed to send welcome email:", error);
+    }
 
     return {
         message: "register new account successful",
