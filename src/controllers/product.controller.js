@@ -1,4 +1,5 @@
 const productService = require("../services/product.service");
+const searchService = require("../services/search.service");
 
 const getAllProducts = async (req, res) => {
     try {
@@ -292,6 +293,16 @@ const searchProductsByName = async (req, res) => {
 
     try {
         const products = await productService.searchProductsByName(keyword);
+
+        (async () => {
+            try {
+                const userId = req.user?.user_id;
+                await searchService.recordSearch(userId, keyword);
+            } catch (error) {
+                console.error(">>> failed to record search keyword:", error);
+            }
+        })();
+
         return res.status(200).json({
             code: 1,
             message: "search products successful",
