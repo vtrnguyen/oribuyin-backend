@@ -316,6 +316,49 @@ const searchProductsByName = async (req, res) => {
     }
 };
 
+const getTopSearchs = async (req, res) => {
+    const limit = parseInt(req.query.limit || "10", 10);
+    try {
+        const top = await searchService.getTopSearches(limit);
+        return res.status(200).json({
+            code: 1,
+            message: "fetch top search keywords successful",
+            data: top,
+        });
+    } catch (error) {
+        console.error("getTopSearches error:", error);
+        return res.status(500).json({
+            code: 0,
+            message: `error when getting top searches: ${error.message}`,
+        });
+    }
+};
+
+const getUserSearchHistory = async (req, res) => {
+    try {
+        const userId = req.user?.user_id;
+        if (!userId) {
+            return res.status(401).json({
+                code: 0,
+                message: "unauthenticated",
+            });
+        }
+        const limit = parseInt(req.query.limit || "10", 10);
+        const history = await searchService.getUserSearchHistory(userId, limit);
+        return res.status(200).json({
+            code: 1,
+            message: "fetch user search history successful",
+            data: history,
+        });
+    } catch (error) {
+        console.error("getUserSearchHistory error:", error);
+        return res.status(500).json({
+            code: 0,
+            message: `error when getting user search history: ${error.message}`,
+        });
+    }
+};
+
 const createProduct = async (req, res) => {
     const { newProduct } = req.body;
 
@@ -480,6 +523,8 @@ module.exports = {
     getTotalStockQuantity,
     getTotalAlmostOutOfStockQuantity,
     searchProductsByName,
+    getTopSearchs,
+    getUserSearchHistory,
     createProduct,
     updateProduct,
     bulkUpdateProductStock,

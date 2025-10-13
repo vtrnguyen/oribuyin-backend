@@ -33,10 +33,16 @@ const recordSearch = async (userId, keyword) => {
 
 const getTopSearches = async (limit = 10) => {
     try {
-        const items = await redis.zRevRangeWithScores(GLOBAL_KEY, 0, limit - 1);
-        return items.map((item) => ({ keyword: item.value, count: Number(item.score) }));
+        const raw = await redis.zRangeWithScores(GLOBAL_KEY, 0, limit - 1, {
+            REV: true
+        });
+
+        return raw.map(item => ({
+            keyword: item.value,
+            count: Number(item.score) || 0
+        }));
     } catch (error) {
-        console.log(">>> search.service.getTopSearches error:", error);
+        console.error(">>> search.service.getTopSearches error:", error);
         return [];
     }
 };

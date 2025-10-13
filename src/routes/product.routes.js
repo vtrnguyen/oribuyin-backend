@@ -10,6 +10,8 @@ router.get("/pagination", authenticate, authorize(["customer"]), productControll
 router.post("/checkout", authenticate, authorize(["customer"]), productController.getCheckoutProductDetail);
 router.get("/filtered/pagination", authenticate, authorize(["admin", "staff", "customer"]), productController.getFilteredPaginationProducts);
 router.get("/categories/:categoryID", authenticate, authorize(["customer"]), productController.getProductsByCategoryID);
+router.get("/search/top", authenticate, authorize(["admin", "staff", "customer"]), productController.getTopSearchs);
+router.get("/search/history", authenticate, authorize(["customer"]), productController.getUserSearchHistory);
 router.get("/search", authenticate, authorize(["customer"]), productController.searchProductsByName);
 router.get("/total-stock", authenticate, authorize(["admin", "staff"]), productController.getTotalStockQuantity);
 router.get("/almost-out-of-stock", authenticate, authorize(["admin", "staff"]), productController.getTotalAlmostOutOfStockQuantity);
