@@ -6,7 +6,7 @@ const { authenticate, authorize } = require("../middlewares/auth.middleware");
 router.get("/", authenticate, authorize(["admin", "staff"]), orderController.getAllOrders);
 router.get("/recent", authenticate, authorize(["admin", "staff"]), orderController.getRecentOrders);
 router.get("/current-month-revenue", authenticate, authorize(["admin"]), orderController.getCurrentMonthRevenue);
-router.get('/revenue/monthly', authenticate, authorize(['admin', 'staff']), orderController.getMonthlyRevenueByYear);
+router.get('/revenue/monthly', authenticate, authorize(['admin']), orderController.getMonthlyRevenueByYear);
 router.get("/by-time-range", authenticate, authorize(["admin", "staff"]), orderController.getOrdersByTimeRange);
 router.get("/count-pending", authenticate, authorize(["admin", "staff"]), orderController.getNumberOfPendingOrders);
 router.get("/:userId", authenticate, authorize(["admin", "staff", "customer"]), orderController.getAllOrdersByUserId);
