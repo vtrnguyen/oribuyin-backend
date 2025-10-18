@@ -4,6 +4,7 @@ const Review = require("../models/Review");
 const User = require("../models/User");
 const Category = require("../models/Category");
 const CartItem = require("../models/CartItem");
+const OrderItem = require("../models/OrderItem");
 
 const getAllProducts = async () => {
     return await Product.findAll();
@@ -305,6 +306,45 @@ const deleteProduct = async (productID) => {
     });
 };
 
+const getTopSellingProducts = async (limit = 10) => {
+    try {
+        // get sum of quantity sold for each product
+        const rows = await OrderItem.findAll({
+            attributes: [
+                "product_id",
+                [Sequelize.fn("SUM", Sequelize.col("quantity")), "total_sold"],
+            ],
+            group: ["product_id"],
+            order: [[Sequelize.literal("total_sold"), "DESC"]],
+            limit: parseInt(limit, 10) || 10,
+            raw: true,
+        });
+
+        if (!rows || rows.length === 0) return;
+
+        // get product details for the top selling products
+        const productIds = rows.map(row => row.product_id);
+        const products = await Product.findAll({
+            where: { id: productIds },
+        });
+
+        const productMap = new Map();
+        products.forEach(product => productMap.set(product.id, product));
+
+        const result = rows.map(r => {
+            const prod = productMap.get(r.product_id) || null;
+            return {
+                product: prod ? prod.get ? prod.get({ plain: true }) : prod : null,
+                total_sold: parseInt(r.total_sold, 10) || 0,
+            };
+        });
+
+        return result;
+    } catch (error) {
+        throw new Error(`Unable to get top selling products: ${error.message}`);
+    }
+};
+
 module.exports = {
     getAllProducts,
     getProductByID,
@@ -322,4 +362,5 @@ module.exports = {
     updateProductStock,
     bulkUpdateProductStock,
     deleteProduct,
+    getTopSellingProducts,
 };

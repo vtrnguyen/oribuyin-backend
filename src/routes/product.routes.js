@@ -15,6 +15,7 @@ router.get("/search/history", authenticate, authorize(["customer"]), productCont
 router.get("/search", authenticate, authorize(["customer"]), productController.searchProductsByName);
 router.get("/total-stock", authenticate, authorize(["admin", "staff"]), productController.getTotalStockQuantity);
 router.get("/almost-out-of-stock", authenticate, authorize(["admin", "staff"]), productController.getTotalAlmostOutOfStockQuantity);
+router.get("/top-selling", authenticate, authorize(["admin", "staff", "customer"]), productController.getTopSellingProducts);
 router.get("/:id", authenticate, authorize(["customer"]), productController.getProductByID);
 router.post("/", authenticate, authorize(["admin"]), productController.createProduct);
 router.put("/:id", authenticate, authorize(["admin"]), productController.updateProduct);

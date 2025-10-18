@@ -511,6 +511,24 @@ const deleteProduct = async (req, res) => {
     }
 };
 
+const getTopSellingProducts = async (req, res) => {
+    const limit = parseInt(req.query.limit || "10", 10);
+    try {
+        const top = await productService.getTopSellingProducts(limit);
+        return res.status(200).json({
+            code: 1,
+            message: "fetch top selling products successful",
+            data: top,
+        });
+    } catch (error) {
+        console.log("getTopSellingProducts error:", error);
+        return res.status(500).json({
+            code: 0,
+            message: `error when fetching top selling products: ${error.message}`,
+        });
+    }
+};
+
 module.exports = {
     getAllProducts,
     getProductByID,
@@ -530,4 +548,5 @@ module.exports = {
     bulkUpdateProductStock,
     updateProductStock,
     deleteProduct,
+    getTopSellingProducts,
 }
