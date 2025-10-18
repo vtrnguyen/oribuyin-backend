@@ -227,6 +227,30 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
+const getMonthlyRevenueByYear = async (req, res) => {
+    try {
+        const year = parseInt(req.query.year, 10);
+        if (!year || isNaN(year)) {
+            return res.status(400).json({
+                code: 0,
+                message: "valid year is required",
+            });
+        }
+        const data = await orderService.getMonthlyRevenueByYear(year);
+        return res.status(200).json({
+            code: 1,
+            message: "get monthly revenue by year successful",
+            data: data,
+        });
+    } catch (error) {
+        console.error('getMonthlyRevenueByYear error:', error);
+        return res.status(500).json({
+            code: -1,
+            message: `error when fetching monthly revenue by year: ${error.message}`,
+        });
+    }
+};
+
 module.exports = {
     getAllOrders,
     getRecentOrders,
@@ -236,4 +260,5 @@ module.exports = {
     getNumberOfPendingOrders,
     createOrder,
     updateOrderStatus,
+    getMonthlyRevenueByYear,
 };

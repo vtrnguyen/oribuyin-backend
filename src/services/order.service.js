@@ -1,4 +1,4 @@
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 const sequelize = require('../config/database');
 const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
@@ -484,7 +484,49 @@ const updateOrderStatus = async (orderID, status) => {
         await transaction.rollback();
         throw new Error(`Error when updating order status: ${error.message}`);
     }
-}
+};
+
+const getMonthlyRevenueByYear = async (year) => {
+    try {
+        if (!year || isNaN(year)) throw new Error("Invalid year parameter");
+
+        const y = Number(year);
+        const start = new Date(y, 0, 1); // Jan 1, 00:00:00
+        const end = new Date(y, 11, 31, 23, 59, 59, 999); // Dec 31, 23:59:59
+        const rows = await Order.findAll({
+            attributes: [
+                [Sequelize.fn('MONTH', Sequelize.col('created_at')), 'month'],
+                [Sequelize.fn('SUM', Sequelize.col('total_amount')), 'revenue'],
+            ],
+            where: {
+                payment_status: 'paid',
+                status: { [Op.ne]: 'cancelled' },
+                created_at: {
+                    [Op.gte]: start,
+                    [Op.lte]: end,
+                },
+            },
+            group: [Sequelize.fn('MONTH', Sequelize.col('created_at'))],
+            order: [[Sequelize.fn('MONTH', Sequelize.col('created_at')), 'ASC']],
+            raw: true,
+        });
+
+        const map = new Map();
+        rows.forEach(r => {
+            const m = Number(r.month);
+            map.set(m, Number(r.revenue || 0));
+        });
+
+        const result = [];
+        for (let m = 1; m <= 12; m++) {
+            result.push({ month: m, revenue: Math.round(map.get(m) || 0) });
+        }
+
+        return result;
+    } catch (error) {
+        throw new Error(`Unable to fetch monthly revenue: ${error.message}`);
+    }
+};
 
 module.exports = {
     getAllOrders,
@@ -495,4 +537,5 @@ module.exports = {
     getNumberOfPendingOrders,
     createNewOrder,
     updateOrderStatus,
+    getMonthlyRevenueByYear,
 };
