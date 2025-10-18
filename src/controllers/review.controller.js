@@ -27,6 +27,31 @@ const createReview = async (req, res) => {
     }
 };
 
+const getReviewsByAvgRating = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page || '1', 10);
+        const pageSize = parseInt(req.query.pageSize || '10', 10);
+        const rating = req.query.rating ? parseInt(req.query.rating, 10) : undefined;
+        const productId = req.query.productId ? parseInt(req.query.productId, 10) : undefined;
+        const sort = req.query.sort || 'desc';
+
+        const result = await reviewService.getReviewsByAvgRating({ page, pageSize, rating, productId, sort });
+
+        return res.status(200).json({
+            code: 1,
+            message: "fetch reviews with product summary successful",
+            data: result,
+        });
+    } catch (error) {
+        console.error('getReviewsByAvgRating error:', error);
+        return res.status(500).json({
+            code: 0,
+            message: `error when fetching reviews by average rating: ${error.message}`,
+        });
+    }
+};
+
 module.exports = {
     createReview,
+    getReviewsByAvgRating,
 };
